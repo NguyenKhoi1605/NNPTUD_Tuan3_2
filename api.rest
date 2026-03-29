@@ -1,0 +1,298 @@
+### REST Client - NNPTUD-S2 API Test Suite
+### Install: VS Code Extension "REST Client" by Huachao Mao
+### Usage: Click "Send Request" above each request or Ctrl+Alt+R
+
+@baseUrl = http://localhost:3000
+@token = token_2_1774807278650_9lnl1gl90 
+
+########################################
+### 1. AUTHENTICATION - Sign In
+########################################
+
+### Sign In - Admin
+# Save the token from response and paste it in @token variable above
+POST {{baseUrl}}/users/sign-in
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### Sign In - Regular User
+POST {{baseUrl}}/users/sign-in
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "user123"
+}
+
+### ❌ Sign In - Invalid Credentials
+POST {{baseUrl}}/users/sign-in
+Content-Type: application/json
+
+{
+  "username": "wrong",
+  "password": "wrong"
+}
+
+### ❌ Sign In - Missing Password
+POST {{baseUrl}}/users/sign-in
+Content-Type: application/json
+
+{
+  "username": "admin"
+}
+
+########################################
+### 2. USER PROFILE - With Token
+########################################
+
+### Get Current User Profile (Requires Token)
+GET {{baseUrl}}/users/profile
+Authorization: Bearer {{token}}
+
+### List All Users (Requires Token)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### ❌ Get Profile - Without Token
+GET {{baseUrl}}/users/profile
+
+### ❌ Get Profile - Invalid Token
+GET {{baseUrl}}/users/profile
+Authorization: Bearer invalid_token_12345
+
+### Sign Out (Clears Token)
+POST {{baseUrl}}/users/sign-out
+Authorization: Bearer {{token}}
+
+########################################
+### 3. PRODUCTS - GET All
+########################################
+
+### GET - All Products
+GET {{baseUrl}}/products
+
+### GET - With Pagination
+GET {{baseUrl}}/products?page=1&limit=5
+
+### GET - Search by Title
+GET {{baseUrl}}/products?title=samsung
+
+### GET - Filter by Price Range
+GET {{baseUrl}}/products?minPrice=1000000&maxPrice=10000000
+
+### GET - Combined Filters
+GET {{baseUrl}}/products?title=samsung&minPrice=5000000&maxPrice=15000000&page=1&limit=10
+
+########################################
+### 4. PRODUCTS - GET by Slug
+########################################
+
+### GET - By Slug (Replace slug with actual)
+GET {{baseUrl}}/products/slug/tai-nghe-bluetooth
+
+### ❌ GET - Slug Not Found
+GET {{baseUrl}}/products/slug/khong-co-san-pham-nay
+
+########################################
+### 5. PRODUCTS - GET by ID
+########################################
+
+### GET - By ID (Replace ID with actual from POST response)
+GET {{baseUrl}}/products/65a1b2c3d4e5f6g7h8i9j0
+
+### ❌ GET - Invalid ID
+GET {{baseUrl}}/products/invalid-id
+
+########################################
+### 6. PRODUCTS - Validation Tests (GET)
+########################################
+
+### ❌ Validation - Page = abc
+GET {{baseUrl}}/products?page=abc
+
+### ❌ Validation - Page = 0
+GET {{baseUrl}}/products?page=0
+
+### ❌ Validation - Limit = -1
+GET {{baseUrl}}/products?limit=-1
+
+### ❌ Validation - MaxPrice < MinPrice
+GET {{baseUrl}}/products?minPrice=10000000&maxPrice=5000000
+
+### ❌ Validation - MinPrice = abc
+GET {{baseUrl}}/products?minPrice=abc
+
+########################################
+### 7. PRODUCTS - CREATE
+########################################
+
+### POST - Create Product (Valid)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Điện thoại Samsung Galaxy A15",
+  "price": 7500000,
+  "description": "Điện thoại thông minh mới nhất, màn hình AMOLED",
+  "category": "Điện thoại"
+}
+
+### POST - Create with Special Characters (Testing Slug)
+# Slug will be: "tai-nghe-bluetooth-jbl-chinh-hang"
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Tai nghe Bluetooth JBL (chính hãng)!!!",
+  "price": 2500000,
+  "description": "Tai nghe không dây chất lượng cao",
+  "category": "Âm thanh"
+}
+
+### POST - Create with Vietnamese Characters
+# Slug will be: "may-tinh-xach-tay-dell"
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Máy tính xách tay Dell XPS",
+  "price": 25000000,
+  "description": "Laptop hiệu suất cao cho công việc",
+  "category": "Máy tính"
+}
+
+########################################
+### 8. PRODUCTS - POST Validation Tests
+########################################
+
+### ❌ POST - Title Empty/Whitespace
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "   ",
+  "price": 5000000,
+  "description": "Mô tả"
+}
+
+### ❌ POST - Description Empty
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Sản phẩm",
+  "price": 5000000,
+  "description": ""
+}
+
+### ❌ POST - Price = abc (Not a number)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Sản phẩm",
+  "price": "abc",
+  "description": "Mô tả"
+}
+
+### ❌ POST - Price = 0
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Sản phẩm",
+  "price": 0,
+  "description": "Mô tả"
+}
+
+### ❌ POST - Price = -1000 (Negative)
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Sản phẩm",
+  "price": -1000,
+  "description": "Mô tả"
+}
+
+### ❌ POST - Missing Price
+POST {{baseUrl}}/products
+Content-Type: application/json
+
+{
+  "title": "Sản phẩm",
+  "description": "Mô tả"
+}
+
+########################################
+### 9. PRODUCTS - UPDATE
+########################################
+
+### PUT - Update Product (Replace ID with actual)
+PUT {{baseUrl}}/products/65a1b2c3d4e5f6g7h8i9j0
+Content-Type: application/json
+
+{
+  "title": "Samsung Galaxy A15 Pro Max",
+  "price": 8500000,
+  "description": "Phiên bản nâng cấp với camera tốt hơn"
+}
+
+### PUT - Update Only Price
+PUT {{baseUrl}}/products/65a1b2c3d4e5f6g7h8i9j0
+Content-Type: application/json
+
+{
+  "price": 6500000
+}
+
+### PUT - Update Title (Slug Auto Updates)
+PUT {{baseUrl}}/products/65a1b2c3d4e5f6g7h8i9j0
+Content-Type: application/json
+
+{
+  "title": "Samsung Galaxy Pro Ultra"
+}
+
+### ❌ PUT - Invalid Price
+PUT {{baseUrl}}/products/65a1b2c3d4e5f6g7h8i9j0
+Content-Type: application/json
+
+{
+  "price": "invalid"
+}
+
+########################################
+### 10. PRODUCTS - DELETE
+########################################
+
+### DELETE - Soft Delete Product (Replace ID with actual)
+DELETE {{baseUrl}}/products/69c969abda063accab8a35d1
+
+### ❌ DELETE - Invalid ID
+DELETE {{baseUrl}}/products/69c9697bda063accab8a35ce
+
+########################################
+### WORKFLOW EXAMPLES
+########################################
+
+### FLOW 1: Sign In → Save Token → Get Profile
+# Step 1: Run "Sign In - Admin" request
+# Step 2: Copy token from response
+# Step 3: Paste token in @token variable at top
+# Step 4: Run "Get Current User Profile" request
+
+### FLOW 2: Create Product → Get by Slug → Update → Delete
+# Step 1: Run "POST - Create Product (Valid)"
+# Step 2: Copy slug from response (e.g., "dien-thoai-samsung-galaxy-a15")
+# Step 3: Run "GET - By Slug" and replace slug
+# Step 4: Copy _id from response
+# Step 5: Run "PUT - Update Product" and replace ID
+# Step 6: Run "DELETE - Soft Delete Product" and replace ID
+
+### FLOW 3: Test All Validations
+# Run all requests starting with "❌" to verify validation works
